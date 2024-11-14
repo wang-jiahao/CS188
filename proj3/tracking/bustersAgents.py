@@ -4,7 +4,7 @@
 # educational purposes provided that (1) you do not distribute or publish
 # solutions, (2) you retain this notice, and (3) you provide clear
 # attribution to UC Berkeley, including a link to http://ai.berkeley.edu.
-# 
+#
 # Attribution Information: The Pacman AI projects were developed at UC Berkeley.
 # The core projects and autograders were primarily created by John DeNero
 # (denero@cs.berkeley.edu) and Dan Klein (klein@cs.berkeley.edu).
@@ -20,25 +20,34 @@ from keyboardAgents import KeyboardAgent
 import inference
 import busters
 
+
 class NullGraphics:
     "Placeholder for graphics"
-    def initialize(self, state, isBlue = False):
+
+    def initialize(self, state, isBlue=False):
         pass
+
     def update(self, state):
         pass
+
     def pause(self):
         pass
+
     def draw(self, state):
         pass
+
     def updateDistributions(self, dist):
         pass
+
     def finish(self):
         pass
+
 
 class KeyboardInference(inference.InferenceModule):
     """
     Basic inference module for use with the keyboard.
     """
+
     def initializeUniformly(self, gameState):
         "Begin with a uniform distribution over ghost positions."
         self.beliefs = util.Counter()
@@ -67,7 +76,8 @@ class KeyboardInference(inference.InferenceModule):
 class BustersAgent:
     "An agent that tracks and displays its beliefs about ghost positions."
 
-    def __init__( self, index = 0, inference = "ExactInference", ghostAgents = None, observeEnable = True, elapseTimeEnable = True):
+    def __init__(self, index=0, inference="ExactInference", ghostAgents=None, observeEnable=True,
+                 elapseTimeEnable=True):
         try:
             inferenceType = util.lookup(inference, globals())
         except Exception:
@@ -107,10 +117,11 @@ class BustersAgent:
         "By default, a BustersAgent just stops.  This should be overridden."
         return Directions.STOP
 
+
 class BustersKeyboardAgent(BustersAgent, KeyboardAgent):
     "An agent controlled by the keyboard that displays beliefs about ghost positions."
 
-    def __init__(self, index = 0, inference = "KeyboardInference", ghostAgents = None):
+    def __init__(self, index=0, inference="KeyboardInference", ghostAgents=None):
         KeyboardAgent.__init__(self, index)
         BustersAgent.__init__(self, index, inference, ghostAgents)
 
@@ -120,9 +131,11 @@ class BustersKeyboardAgent(BustersAgent, KeyboardAgent):
     def chooseAction(self, gameState):
         return KeyboardAgent.getAction(self, gameState)
 
+
 from distanceCalculator import Distancer
 from game import Actions
 from game import Directions
+
 
 class GreedyBustersAgent(BustersAgent):
     "An agent that charges the closest ghost."
@@ -131,7 +144,7 @@ class GreedyBustersAgent(BustersAgent):
         "Pre-computes the distance between every two points."
         BustersAgent.registerInitialState(self, gameState)
         self.distancer = Distancer(gameState.data.layout, False)
-    
+
     ########### ########### ###########
     ########### QUESTION 8  ###########
     ########### ########### ###########
@@ -147,7 +160,49 @@ class GreedyBustersAgent(BustersAgent):
         livingGhosts = gameState.getLivingGhosts()
         livingGhostPositionDistributions = \
             [beliefs for i, beliefs in enumerate(self.ghostBeliefs)
-             if livingGhosts[i+1]]
+             if livingGhosts[i + 1]]
         "*** YOUR CODE HERE ***"
-        raiseNotDefined()
+        targets = [ghost_position.argMax() for ghost_position in \
+                   livingGhostPositionDistributions]
+        target_distances = util.Counter()
+        true_target = targets[0]
+        for target in targets:
+            target_distances[target] = self.distancer.getDistance(pacmanPosition, target)
+            if target_distances[true_target] > target_distances[target]:
+                true_target = target
+        action_distances = util.Counter()
+        best_action = legal[0]
+        for action in legal:
+            new_pos = Actions.getSuccessor(pacmanPosition, action)
+            action_distances[action] = self.distancer.getDistance(new_pos, true_target)
+            if action_distances[best_action] > action_distances[action]:
+                best_action = action
+        return best_action
+        # mindis = 1e9
+        # minghost = None
+        # for DiscreteDistribution in livingGhostPositionDistributions:
+        #     pos = max(DiscreteDistribution,key=DiscreteDistribution.get)
+        #     dis = self.distancer.getDistance(pacmanPosition,pos)
+        #     print(dis)
+        #     if dis<mindis:
+        #         mindis=dis
+        #         minghost=DiscreteDistribution
+        #
+        # if minghost==None:
+        #     print("um\n")
+        #     return None
+        # ghostpos = max(minghost,key=minghost.get)
+        # mindis = 1e9
+        # bestact = None
+        #
+        # for action in legal:
+        #     newpos = Actions.getSuccessor(pacmanPosition,action)
+        #     dis = self.distancer.getDistance(ghostpos,newpos)
+        #     if dis<mindis:
+        #         mindis=dis
+        #         bestact = action
+        # return bestact
+
+        # self.distancer.getDistance(pos1, pos2)
+        # successorPosition = Actions.getSuccessor(position, action)
         "*** END YOUR CODE HERE ***"
