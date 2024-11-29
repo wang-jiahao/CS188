@@ -6,10 +6,10 @@ https://inst.eecs.berkeley.edu/~cs188/fa24/
 
 ## courses information
 
-1. project 1: multiagent
+- [x] project 1: multiagent
 
-2. project 2: logic
+- [x] project 2: logic
 
-3. project 3: tracking
+- [x] project 3: tracking
 
-4. project 4: machine learning
+- [x] project 4: machine learning
